@@ -10,7 +10,7 @@ class OnPolicyMC:
         """
         Monte Carlo On-Policy Control for Blackjack
         """
-        self.epsilon = epsilon  # Explorastion probability
+        self.epsilon = epsilon  # Exploration probability
         self.gamma = gamma  # Discount factor
 
         # Q-function: Q(s,a) -> expected return
