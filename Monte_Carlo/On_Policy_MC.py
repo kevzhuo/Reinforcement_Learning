@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 class OnPolicyMC:
     def __init__(self, epsilon=0.1, gamma=1.0):
         """
-        Monte Carlo Off-Policy Control for Blackjack using Importance Sampling
+        Monte Carlo On-Policy Control for Blackjack
         """
         self.epsilon = epsilon  # Explorastion probability
         self.gamma = gamma  # Discount factor
@@ -130,7 +130,7 @@ class OnPolicyMC:
 
         print(f"Training Monte Carlo Control for {num_episodes} episodes...")
 
-        for episode_num in tqdm.tqdm(range(num_episodes)):
+        for _ in tqdm.tqdm(range(num_episodes)):
             # Generate episode and update Q-function
             episode = self.generate_episode(env)
             self.update_q_function(episode)
@@ -139,17 +139,6 @@ class OnPolicyMC:
             episode_reward = episode[-1][2]  # Final reward
             self.episode_rewards.append(episode_reward)
             self.episode_lengths.append(len(episode))
-
-            # Periodic evaluation and progress reporting
-            if (episode_num + 1) % eval_interval == 0:
-                # Evaluate current policy
-                policy = self.get_optimal_policy()
-                win_rate, avg_reward = self.evaluate_policy(env, policy, 10000)
-
-                print(f"Episode {episode_num + 1}/{num_episodes}")
-                print(f"  Win rate: {win_rate:.4f}")
-                print(f"  Average reward: {avg_reward:.4f}")
-                print(f"  States explored: {len(self.Q)}")
 
         env.close()
         print(f"\nTraining completed!")
@@ -230,12 +219,12 @@ def plot_policy_heatmap(policy):
 
 
 if __name__ == "__main__":
-    mc_control = OnPolicyMC(epsilon=1.0, gamma=1.0)
-    optimal_policy = mc_control.train(num_episodes=500000, eval_interval=50000)
+    on_policy_mc = OnPolicyMC(epsilon=1.0, gamma=1.0)
+    optimal_policy = on_policy_mc.train(num_episodes=500000, eval_interval=50000)
 
     # Final evaluation
     env = gym.make("Blackjack-v1")
-    win_rate, avg_reward = mc_control.evaluate_policy(env, optimal_policy, 10000)
+    win_rate, avg_reward = on_policy_mc.evaluate_policy(env, optimal_policy, 10000)
     print(f"\nFinal Policy Evaluation over 10,000 episodes:")
     print(f"  Win rate: {win_rate:.4f}")
     print(f"  Average reward: {avg_reward:.4f}")
