@@ -17,12 +17,7 @@ class OffPolicyMonteCarloControl:
         
         # Cumulative weights for weighted importance sampling
         self.C = defaultdict(lambda: defaultdict(float))
-        
-        # Performance tracking
-        self.episode_rewards = []
-        self.episode_lengths = []
-        self.importance_ratios = []
-        self.target_policy_values = []
+
         
     def behavior_policy(self, state):
         """
@@ -144,12 +139,10 @@ class OffPolicyMonteCarloControl:
         
         return wins / num_episodes, total_reward / num_episodes
 
-    def train(self, num_episodes=100000, eval_interval=10000):
+    def train(self, env, num_episodes=100000):
         """
         Train using off-policy Monte Carlo control
         """
-        env = gym.make("Blackjack-v1")
-        
         print(f"Training Off-Policy Monte Carlo Control for {num_episodes} episodes...")
         print(f"Behavior policy: ε-greedy with ε = {self.epsilon}")
         print(f"Target policy: Greedy")
@@ -161,11 +154,6 @@ class OffPolicyMonteCarloControl:
             # Update Q-function using off-policy control
             self.off_policy_mc_control(episode)
             
-            # Track episode statistics
-            episode_reward = episode[-1][2]  # Final reward
-            self.episode_rewards.append(episode_reward)
-            self.episode_lengths.append(len(episode))
-            
             # Calculate average importance ratio for this episode
             total_weight = 1.0
             for state, action, reward, behavior_prob in episode:
@@ -175,7 +163,6 @@ class OffPolicyMonteCarloControl:
                 else:
                     total_weight = 0
                     break
-            self.importance_ratios.append(total_weight)
         
         env.close()
         print(f"\nTraining completed!")
@@ -266,16 +253,16 @@ def plot_policy_heatmap(policy):
     
 
 if __name__ == "__main__":  
+    env = gym.make("Blackjack-v1")
     off_policy_mc = OffPolicyMonteCarloControl(
-        epsilon=0.1,    # Exploration rate for behavior policy
-        gamma=1.0       # Undiscounted (episodic task)
+        epsilon=0.1,   
+        gamma=1.0       
     )
     
     # Train the algorithm
-    target_policy = off_policy_mc.train(num_episodes=100000, eval_interval=10000)
+    target_policy = off_policy_mc.train(env, num_episodes=200000)
     
     # Final policy evaluation
-    env = gym.make("Blackjack-v1")
     final_win_rate, final_avg_reward = off_policy_mc.evaluate_policy(env, target_policy, 10000)
     env.close()
 

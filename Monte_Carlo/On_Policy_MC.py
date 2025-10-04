@@ -122,23 +122,16 @@ class OnPolicyMC:
 
         return wins / num_episodes, total_reward / num_episodes
 
-    def train(self, num_episodes=500000, eval_interval=50000):
+    def train(self, env, num_episodes=100000):
         """
         Train the Monte Carlo control algorithm
         """
-        env = gym.make("Blackjack-v1")
-
         print(f"Training Monte Carlo Control for {num_episodes} episodes...")
 
         for _ in tqdm.tqdm(range(num_episodes)):
             # Generate episode and update Q-function
             episode = self.generate_episode(env)
             self.update_q_function(episode)
-
-            # Track episode statistics
-            episode_reward = episode[-1][2]  # Final reward
-            self.episode_rewards.append(episode_reward)
-            self.episode_lengths.append(len(episode))
 
         env.close()
         print(f"\nTraining completed!")
@@ -219,11 +212,11 @@ def plot_policy_heatmap(policy):
 
 
 if __name__ == "__main__":
+    env = gym.make("Blackjack-v1")
     on_policy_mc = OnPolicyMC(epsilon=1.0, gamma=1.0)
-    optimal_policy = on_policy_mc.train(num_episodes=500000, eval_interval=50000)
+    optimal_policy = on_policy_mc.train(env, num_episodes=200000)
 
     # Final evaluation
-    env = gym.make("Blackjack-v1")
     win_rate, avg_reward = on_policy_mc.evaluate_policy(env, optimal_policy, 10000)
     print(f"\nFinal Policy Evaluation over 10,000 episodes:")
     print(f"  Win rate: {win_rate:.4f}")
