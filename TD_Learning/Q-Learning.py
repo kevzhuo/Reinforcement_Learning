@@ -5,10 +5,10 @@ from collections import defaultdict
 import matplotlib.pyplot as plt
 from gymnasium.wrappers import RecordVideo
 
-class Sarsa:
+class QLearning:
     def __init__(self, alpha = 0.1, gamma = 1.0, epsilon = 0.1):
         """
-        Sarsa
+        Q-Learning
         """ 
         self.alpha = alpha
         self.gamma = gamma
@@ -31,7 +31,7 @@ class Sarsa:
     
     def generate_episode_and_update(self, env):
         """
-        Generate an episode and update Q-function every step using Sarsa
+        Generate an episode and update Q-function every step using Q-Learning
         """
         episode = []
         state, _ = env.reset()
@@ -41,20 +41,15 @@ class Sarsa:
             next_state, reward, terminated, truncated, _ = env.step(action)
             episode.append((state, action, reward))
             
-            # Choose next action using behavior policy
-            if terminated or truncated:
-                next_action = None
-            else:
-                next_action = self.behavior_policy(next_state)
-            
-            # Sarsa update
+            # Q-Learning update
             q_sa = self.Q[state][action]
-            if next_action is not None:
-                q_snext_anext = self.Q[next_state][next_action]
+            if not (terminated or truncated):
+                # Use max Q-value over all actions in next state (off-policy)
+                max_q_next = max([self.Q[next_state][a] for a in range(4)])
             else:
-                q_snext_anext = 0.0
+                max_q_next = 0.0
             
-            td_target = reward + self.gamma * q_snext_anext
+            td_target = reward + self.gamma * max_q_next
             td_error = td_target - q_sa
             self.Q[state][action] += self.alpha * td_error
             
@@ -64,21 +59,22 @@ class Sarsa:
     
     def get_optimal_policy(self):
         """
-        Extract the optimal policy from the Q-function
+        Derive the optimal policy from the learned Q-function
         """
         policy = {}
         for state in self.Q:
-            q_values = [self.Q[state][0], self.Q[state][1], self.Q[state][2], self.Q[state][3]]
-            policy[state] = np.argmax(q_values)
+            q_values = [self.Q[state][a] for a in range(4)]
+            best_action = np.argmax(q_values)
+            policy[state] = best_action
         return policy
     
     def train(self, env, num_episodes=100000):
         """
-        Train the Sarsa agent
+        Train the Q-Learning agent
         """
         env = gym.make('CliffWalking-v1')
 
-        print(f"Training Sarsa for {num_episodes} episodes...")
+        print(f"Training Q-Learning for {num_episodes} episodes...")
         
         for _ in tqdm.tqdm(range(num_episodes)):
             # Generate episode and update Q-function
@@ -87,8 +83,8 @@ class Sarsa:
         env.close()
         
         return self.get_optimal_policy()
-
-    def evaluate_policy(self, env, policy, video_folder="videos", video_prefix="sarsa-agent"):
+    
+    def evaluate_policy(self, env, policy, video_folder="videos", video_prefix="qlearning-agent"):
         """
         Evaluate the policy by showing the agent's path and recording a video
         """
@@ -121,12 +117,12 @@ class Sarsa:
         return total_reward, steps
 
 if __name__ == "__main__":
-    sarsa_agent = Sarsa(alpha=0.5, gamma=1.0, epsilon=0.1)
+    qlearning_agent = QLearning(alpha=0.5, gamma=1.0, epsilon=0.1)
     env = gym.make("CliffWalking-v1", render_mode="rgb_array")
-    optimal_policy = sarsa_agent.train(env, num_episodes=200000)
+    optimal_policy = qlearning_agent.train(env, num_episodes=200000)
 
     # Final evaluation with video recording
     print("\nEvaluating the learned policy:")
     env = gym.make("CliffWalking-v1", render_mode="rgb_array")
-    final_reward, final_steps = sarsa_agent.evaluate_policy(env, optimal_policy, video_folder="TD_Learning", video_prefix="sarsa-final-policy")
+    final_reward, final_steps = qlearning_agent.evaluate_policy(env, optimal_policy, video_folder="TD_Learning", video_prefix="qlearning-final-policy")
     print(f"Final evaluation: {final_steps} steps, total reward = {final_reward}")
