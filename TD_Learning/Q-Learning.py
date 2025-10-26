@@ -7,9 +7,6 @@ from gymnasium.wrappers import RecordVideo
 
 class QLearning:
     def __init__(self, alpha = 0.1, gamma = 1.0, epsilon = 0.1):
-        """
-        Q-Learning
-        """ 
         self.alpha = alpha
         self.gamma = gamma
         self.epsilon = epsilon
@@ -69,9 +66,6 @@ class QLearning:
         return policy
     
     def train(self, env, num_episodes=100000):
-        """
-        Train the Q-Learning agent
-        """
         env = gym.make('CliffWalking-v1')
 
         print(f"Training Q-Learning for {num_episodes} episodes...")
@@ -85,9 +79,6 @@ class QLearning:
         return self.get_optimal_policy()
     
     def evaluate_policy(self, env, policy, video_folder="videos", video_prefix="qlearning-agent"):
-        """
-        Evaluate the policy by showing the agent's path and recording a video
-        """
         # Wrap environment with RecordVideo to capture the episode
         env = RecordVideo(
             env,

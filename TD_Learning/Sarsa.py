@@ -7,9 +7,6 @@ from gymnasium.wrappers import RecordVideo
 
 class Sarsa:
     def __init__(self, alpha = 0.1, gamma = 1.0, epsilon = 0.1):
-        """
-        Sarsa
-        """ 
         self.alpha = alpha
         self.gamma = gamma
         self.epsilon = epsilon
@@ -89,9 +86,6 @@ class Sarsa:
         return self.get_optimal_policy()
 
     def evaluate_policy(self, env, policy, video_folder="videos", video_prefix="sarsa-agent"):
-        """
-        Evaluate the policy by showing the agent's path and recording a video
-        """
         # Wrap environment with RecordVideo to capture the episode
         env = RecordVideo(
             env,
