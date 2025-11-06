@@ -1,8 +1,3 @@
-"""
-REINFORCE Algorithm (Monte Carlo Policy Gradient)
-This implementation supports OpenAI Gymnasium environments via CLI.
-"""
-
 import argparse
 import numpy as np
 import torch
