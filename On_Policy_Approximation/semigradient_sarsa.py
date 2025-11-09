@@ -32,7 +32,6 @@ class SemiGradientSarsa:
             return np.argmax(q_values)
 
     def generate_episode_and_update(self):
-
         state, _ = self.env.reset()
         action = self.epsilon_greedy_policy(state)
         total_reward = 0
